@@ -11,7 +11,7 @@
 - install miniconda https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
 - Git clone this repo
     - `cd` to where you want this folder
-    - `git clone git@pandora.mriglobal.org:cprice/kz_augur.git`
+    - `git clone https://github.com/mriglobal/kz_analysis.git`
 - Set up your environment
     - `cd kz_augur`
     - `conda env create -f KZ_augur.yml`
