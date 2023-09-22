@@ -9,7 +9,6 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import sourmash
-import umap
 
 
 class KZ_Pipeline():
@@ -32,23 +31,23 @@ class KZ_Pipeline():
         self.reference = reference
         
         # Set references and metadata for TBEV
-        if self.reference == 'TBEV': ### ----------------------------------------> Need to work on TBEV section
+        if self.reference == 'TBEV':
             self.ref_file = 'res/TBEV_reference.fasta'
             self.ref_file_gb = 'res/TBEV_reference.gb'
             self.mmi_file = 'res/TBEV_reference.mmi'
             self.metadata_file = 'res/TBEV_metadata.tsv'
             self.ncbidata_file = 'res/TBEV_NCBI_metadata.tsv'
-            self.genbank_fasta = 'res/TBEV_genbank.fasta'
-            self.genbank_metadata = 'res/TBEV_genbank_metadata.csv'
+            self.export_fasta = 'tmp/TBEV.fasta'
+            self.export_tsv = 'tmp/TBEV_metadata.tsv'
         # Set references and metadata for CCHF
         elif self.reference == 'CCHF':
             self.ref_file = 'res/CCHF_reference.fasta'
-            self.ref_file_gb = ''
+            self.ref_file_gb = 'res/CCHF_reference.gb'
             self.mmi_file = 'res/CCHF_reference.mmi'
             self.metadata_file = 'res/CCHF_metadata.tsv'
             self.ncbidata_file = 'res/CCHF_NCBI_metadata.tsv'
-            self.genbank_fasta = 'res/CCHF_genbank.fasta'
-            self.genbank_metadata = 'res/CCHF_genbank_metadata.csv'
+            self.export_fasta = 'tmp/CCHF.fasta'
+            self.export_tsv = 'tmp/CCHF_metadata.tsv'
         else:
             raise Exception("Need the reference to be either TBEF or CCHF")
         
@@ -60,7 +59,15 @@ class KZ_Pipeline():
         if os.path.exists(self.metadata_file):
             self.metadata = pd.read_table(self.metadata_file)
         else:
-            self.metadata = pd.DataFrame()
+            self.metadata = pd.DataFrame({
+                'name':             [],
+                'length':           [],
+                'date':             [],
+                'country':          [],
+                'isolation_source': [],
+                'host':             [],
+                'desc':             [],
+            })
 
         self.ncbidata = pd.read_table(self.ncbidata_file)
 
@@ -100,10 +107,20 @@ class KZ_Pipeline():
                 SeqRecord(
                     Seq(str(row['seq'])), 
                     id=str(row['name']),
-                    description=str(row['desc']),
+                    description='',
                     )
                 )
         return seqs
+    
+    def create_export_tmp(self):
+        fasta = self.seqs_from_df(self.metadata[['name','seq']])
+        SeqIO.write(fasta, self.export_fasta, 'fasta')
+
+        export_metadata = self.metadata
+        del export_metadata['seq']
+        export_metadata.to_csv(self.export_tsv, sep='\t', index=False)
+
+        return [self.export_fasta, self.export_tsv]
 
     ######################################################################################################################
     ## ---- MAKE ASSEMBLY FROM UPLOADED FASTQ. 
@@ -253,31 +270,21 @@ class KZ_Pipeline():
                   )
         
 
+    ######################################################################################################################
+    ## ---- CREATE EMBEDDING
     def process_embedding(self,input_df, args):
-        # TODO: manage labels
-
-        # Get our genebank sequences
-        if self.reference == 'CCHF':
-            seqs = [seq for seq in list(SeqIO.parse(self.genbank_fasta,'fasta')) if len(seq.seq) < 4000]
-        else:
-            seqs = [seq for seq in list(SeqIO.parse(self.genbank_fasta,'fasta'))]
 
         # Get labels for uploaded data
-        input_labels = input_df[['name','length','date','country','host','desc','type']]
+        input_labels = input_df[['name','length','date','country','isolation_source','host','desc','type']]
 
         # Get labels for genbank data
-        seq_df = pd.DataFrame({'Accession': [seq.id for seq in seqs]})
-        genbank_labels = pd.read_csv(self.genbank_metadata)
-        genbank_labels = genbank_labels[['Accession','Length','Collection_Date','Geo_Location','Host','Isolate','Sequence_Type']]
-        genbank_labels = pd.merge(seq_df, genbank_labels, on='Accession', how='left')
-        genbank_labels.columns = ['name','length','date','country','host','desc','type']
+        genbank_labels = self.ncbidata[['name','length','date','country','isolation_source','host','desc']]
+        genbank_labels['type'] = 'Genbank'
         labels = pd.concat([input_labels,genbank_labels])
 
-        # Get our added sequences
+        # Get our sequences
+        seqs = self.seqs_from_df(self.ncbidata)
         seqs = self.seqs_from_df(input_df) + seqs
-
-        print(f'Seqs {len(seqs)}')
-        print(f'Labels {len(labels)}')
 
         sketches = []
         # Add our sequences

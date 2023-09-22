@@ -1,0 +1,30 @@
+name: kz
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - augur
+  - auspice
+  - bcftools
+  - biopython
+  - minimap2
+  - matplotlib
+  - nextstrain
+  - nextstrain-cli
+  - pandas
+  - python=3.8
+  - samtools
+  - scikit-learn
+  - scipy
+  - sourmash
+  - sourmash-minimal
+  - streamlit
+  - umap-learn
+  - vcftools
+  - seaborn
+  - datashader
+  - bokeh
+  - holoviews
+  - colorcet
+  - scikit-image

@@ -1,0 +1,37 @@
+{
+    "title": "TBEV and CCHF nextstrain viewer",
+    "maintainers": [
+      {"name": "MRIGlobal", "url": "https://www.mriglobal.org"}
+    ],
+    "build_url": "https://github.com/mriglobal",
+    "colorings": [
+     {
+      "key": "host",
+      "title": "Host",
+      "type": "categorical"
+     },
+     {
+        "key": "num_date",
+        "title": "Date",
+        "type": "continuous"
+      },
+     {
+        "key": "isolation_source",
+        "title": "Isolation Source",
+        "type": "categorical"
+     },
+     {
+       "key": "country",
+       "title": "Country",
+       "type": "categorical"
+     }
+    ],
+    "geo_resolutions": [
+      "country"
+    ],
+    "filters": [
+     "country",
+     "host",
+     "isolation_source"
+    ]
+   }
