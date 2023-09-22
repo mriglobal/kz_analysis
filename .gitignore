@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.log
+*.db
+*.sqlite3
+*.env
+
+# Jupyter Notebook
+*.ipynb_checkpoints/
+*.ipynb_backups/
+*.sqlite3
+*.pdf
+*.html
+*.png
+*.jpg
