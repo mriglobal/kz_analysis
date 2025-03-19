@@ -110,7 +110,7 @@ def file_uploader():
             temp_file = tempfile.NamedTemporaryFile(delete=False)
             temp_file.write(file.read())
 
-            st.write("Assembling and Creating Concenssus...")
+            st.write("Assembling and Creating Consensus...")
             average_coverage, total_seqs, reads_mapped, reads_unmapped, quality, average_snp_quality, coverage_data = run.make_assembly(temp_file.name, metadata_input)
             st.write('Done!')
 
