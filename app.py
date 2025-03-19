@@ -4,17 +4,52 @@ import tempfile
 import zipfile
 import altair as alt
 import umap
-import matplotlib.pyplot as plt
+import shutil
 from KZ import KZ_Pipeline
+import subprocess
+import webbrowser
+import os
 
 ######################################################################################################################
+def fastqc_report():
+    st.markdown("## Upload a FastQ file for fastQC report generation")
+              
+    default_dir = os.getcwd()
+    folder_path = st.text_input("Enter the path to your data:", value=default_dir)
+    
+    if os.path.isdir(folder_path):
+        # List all files in the directory with the specific extensions
+        files = [f for f in os.listdir(folder_path) if f.endswith('.fq') or f.endswith('.fastq')]
+        if files:
+            selected_file = st.selectbox("Select a file", files)
+            st.write("You selected:", selected_file)
+        else:
+            st.write("No .fq or .fastq files found in this directory.")
+    else:
+        st.error("The specified path is not a valid directory.")
+        
+    if st.button("Generate fastQC report"):
+        if not folder_path.endswith('/'):
+            folder_path = folder_path+"/"
+        subprocess.run(["fastqc", folder_path+selected_file, "-o", "tmp/", "-f", "fastq", '--nano'], capture_output=True)
+        
+        report_file = os.path.join("tmp/", selected_file.replace('.fastq', '_fastqc.html').replace('.fq', '_fastqc.html'))
+        
+        if os.path.exists(report_file):
+            webbrowser.open("file://"+os.getcwd()+"/tmp/"+ selected_file.replace('.fastq', '_fastqc.html').replace('.fq', '_fastqc.html'))
+        else:
+            st.error("FastQC report could not be generated.")
+
+######################################################################################################################
+
 # Custom function to handle file upload
 def file_uploader():
     st.markdown("## Upload a FastQ file")
     st.markdown("Upload your fastq file to map to a reference and make a concessus sequence. If you have many small fastqs in one run, you may want to `cat *.fastq > new.fastq`. These will be added to a list for nextstrain analysis.")
     
     # File uploader
-    file = st.file_uploader("Choose a fastq file", type=["fastq","fq"])
+    file = st.file_uploader("Choose a fastq file", type=["fastq","fq"])     
+    
     # Reference Selector
     reference = st.selectbox("Select Reference", ['','CCHF','TBEV'])
 
@@ -56,7 +91,6 @@ def file_uploader():
         if source_select == 'Add New':
             source_custom = st.text_input("Custom Source")
             
-
         if st.button("Submit"):
             # Work out the select box values
             host = host_custom if host_select == 'Add New' else host_select
@@ -77,12 +111,35 @@ def file_uploader():
             temp_file.write(file.read())
 
             st.write("Assembling and Creating Concenssus...")
-            run.make_assembly(temp_file.name, metadata_input)
+            average_coverage, total_seqs, reads_mapped, reads_unmapped, quality, average_snp_quality, coverage_data = run.make_assembly(temp_file.name, metadata_input)
             st.write('Done!')
 
             temp_file.close()
             #st.session_state.step = 2
-
+            st.write('Total Sequences: ' + str(total_seqs))
+            st.write('Sequences Mapped: ' + str(reads_mapped))
+            st.write('Sequences Unampped: ' + str(reads_unmapped))
+            st.write('Average Quality: ' + str(quality))
+            st.write('Average Coverage: ' + str(average_coverage))
+            st.write('Average SNP Quality: ' + str(average_snp_quality))
+            st.write('Generating Coverage Plot...' )
+                        
+            plot_df = pd.DataFrame([x.split('\t') for x in coverage_data], columns=['Ref', 'Pos', 'Depth'])
+            plot_df['Depth'] = pd.to_numeric(plot_df['Depth'])
+            plot_df['Pos'] = pd.to_numeric(plot_df['Pos'])
+            
+            chart = alt.Chart(plot_df).mark_line().encode(
+            x=alt.X('Pos:Q', scale=alt.Scale(zero=False), axis=alt.Axis(title='Position')),
+            y=alt.Y('Depth:Q', scale=alt.Scale(zero=False), axis=alt.Axis(title='Depth')),
+            tooltip=['Pos', 'Depth']
+            ).properties(
+                width=800,
+                height=600,
+                title='Coverage Plot'
+            ).interactive()
+        
+            # Display the chart in Streamlit
+            st.altair_chart(chart)
 
 ######################################################################################################################
 # Run Nextstrain
@@ -104,21 +161,33 @@ def run_nextstrain():
         df = run.metadata
 
     if len(df) > 0:
-        edited_df = df
-        edited_df['Include'] = True
-        edited_df = df[['Include','name','date','length','country','isolation_source','host','desc']]
-        edited_df = st.data_editor(df, disabled=('name','date','length','country','isolation_source','host','desc'))
+        df['Include'] = True
+        df['Delete'] = False  # Column to select records for deletion
+        edited_df = df[['Delete', 'Include', 'name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc']]
+        edited_df = st.data_editor(df, disabled=('name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc','seq'))
+
+        # Delete selected records
+        if st.button("Delete Selected Records"):
+            names_to_keep = edited_df[edited_df['Delete'] == False]['name'].tolist()
+            df = df[df['name'].isin(names_to_keep)]
+            run.metadata = df  # Update the metadata DataFrame
+
+            # Write changes back to the file
+            df.to_csv(run.metadata_file, sep='\t', index=False)
+            st.success("Selected records deleted and metadata updated.")
+            if st.button("Click to update dataframe"):
+                edited_df['Delete']=False
 
         # Submit Changes. Build New DF and Run Nextstrain
         if st.button("Submit"):
-            include_indexs = edited_df.loc[edited_df['Include']==True].index.values.tolist()
-            new_df = df.iloc[include_indexs]
+            include_indexes = edited_df.loc[edited_df['Include'] == True].index.values.tolist()
+            new_df = df.iloc[include_indexes]
 
             if len(new_df) > 3:
                 st.write('Creating Augur Alignment...')
-                run.create_msa(new_df[['name','desc','seq']])
+                run.create_msa(new_df[['name', 'desc', 'seq']])
                 st.write('Building trees and node data...')
-                run.process_augur(new_df[['name','date','country','isolation_source','host']])
+                run.process_augur(new_df[['name', 'date', 'country', 'isolation_source', 'host']])
                 st.write('Passing data to nextstrain...')
                 run.view_nextstrain()
             else:
@@ -142,7 +211,7 @@ def run_embedding():
     # Get our dataframe but it in an editable table
     edited_df = run.metadata
     edited_df['Include'] = True
-    edited_df = st.data_editor(edited_df, disabled=('name','date','length','country','isolation_source','host','desc'))
+    edited_df = st.data_editor(edited_df, disabled=('name','date','length','country','isolation_source','host','desc','seq'))
 
     # Selector controls for graph
     col1, col2 = st.columns(2)
@@ -207,29 +276,70 @@ def run_embedding():
 # Export
 def run_export():
 
-    st.write('Building Archive Files...')
+    st.write('Click to export all CCHF NCBI and submitted records')
+    if st.button("Export all CCHF"):
+        run1 = run = KZ_Pipeline()
+        run1.clean() # Remove everything in the tmp directory
+        run1.set_reference('CCHF')
+        files = run1.create_export_tmp()
+        archive_name = f'tmp/KZ_archive_{run1.time}.zip'
 
-    # Create my archive
-    run1 = run = KZ_Pipeline()
-    run1.clean() # Remove everything in the tmp directory
-    run1.set_reference('CCHF')
-    files1 = run1.create_export_tmp()
+        with zipfile.ZipFile(archive_name,'w') as zipf:
+            for file in files:
+                zipf.write(file, arcname=file.split('/')[-1])
+    
+        with open(archive_name, 'rb') as f:
+            st.download_button("Download Zip", f, file_name="CCHF_archive.zip")
+    
+    st.write('Click to export all TBEV NCBI and submitted records')
+    if st.button("Export all TBEV"):
+        run2 = run = KZ_Pipeline()
+        run2.clean() # Remove everything in the tmp directory
+        run2.set_reference('TBEV')
+        files = run2.create_export_tmp()
+        archive_name = f'tmp/KZ_archive_{run2.time}.zip'
+        
+        with zipfile.ZipFile(archive_name,'w') as zipf:
+            for file in files:
+                zipf.write(file, arcname=file.split('/')[-1])
+    
+        with open(archive_name, 'rb') as f:
+            st.download_button("Download Zip", f, file_name="TBEV_archive.zip")
+        
+    
+    
+    st.write('Click to export select uploaded records. Folder will contain the assembled consensus sequences in fasta format')
+    df1 = pd.read_table('res/TBEV_metadata.tsv')
+    df2 = pd.read_table('res/CCHF_metadata.tsv')
+    
+    # Concatenate the DataFrames
+    df = pd.concat([df1,df2]).reset_index(drop=True)
+    edited_df = df[['name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc', 'seq', 'Include']]
+    edited_df['Include']=False
+    edited_df = st.data_editor(edited_df, disabled=('name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc','seq'))
+    
+    if st.button("Export select sequences"):
+        selected_df = edited_df[edited_df['Include']]
+        temp_dir = 'tmp_export'
+        os.makedirs(temp_dir, exist_ok=True)
+        archive_name = f'{temp_dir}/KZ_selected_records.zip'
+        
+        with zipfile.ZipFile(archive_name, 'w') as zipf:
+            # Create a FASTA file for each selected record
+            for _, row in selected_df.iterrows():
+                fasta_content = f">{row['name']}\n{row['seq']}\n"
+                fasta_filename = f"{temp_dir}/{row['name']}.fasta"
+                
+                with open(fasta_filename, 'w') as fasta_file:
+                    fasta_file.write(fasta_content)
 
-    run2 = run = KZ_Pipeline()
-    run2.set_reference('TBEV')
-    files2 = run2.create_export_tmp()
-
-    files = files1 + files2
-
-    archive_name = f'tmp/KZ_archive_{run1.time}.zip'
-
-    with zipfile.ZipFile(archive_name,'w') as zipf:
-        for file in files:
-            zipf.write(file, arcname=file.split('/')[-1])
-
-    with open(archive_name, 'rb') as f:
-        st.download_button("Download Zip", f, file_name="KZ_archive.zip")
-
+                zipf.write(fasta_filename, os.path.basename(fasta_filename))
+                os.remove(fasta_filename)
+                
+        # Provide download link for the zip file
+        with open(archive_name, 'rb') as f:
+            st.download_button('Download ZIP', f.read(), file_name=os.path.basename(archive_name))
+        shutil.rmtree(temp_dir)
 
 
 ######################################################################################################################
@@ -238,7 +348,7 @@ def main():
         st.session_state.step = 1
 
     st.title("KZ analysis")
-    selected_page = st.sidebar.radio("Select a Page", ["Upload Fastq", "Run Nextstrain", "Run Embedding", "Export Results"])
+    selected_page = st.sidebar.radio("Select a Page", ["Generate fastQC report", "Upload Fastq", "Run Nextstrain", "Run Embedding", "Export Results"])
 
     content = st.container()
 
@@ -251,6 +361,9 @@ def main():
     elif selected_page == 'Export Results':
         with content:
             run_export()
+    elif selected_page == "Generate fastQC report":
+        with content:
+            fastqc_report()
     else:
         with content:
             file_uploader()

@@ -9,7 +9,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import sourmash
-
+import subprocess
 
 class KZ_Pipeline():
 
@@ -158,7 +158,7 @@ class KZ_Pipeline():
             current_seqs = self.metadata.name.to_list() + self.ncbidata.name.to_list()
         else:
             current_seqs = []
-
+            
         # Loop through each sequence and add it to our metadata table
         for seq in [s for s in SeqIO.parse('tmp/consensus.fasta','fasta')]:
             # Clean up the name
@@ -184,7 +184,36 @@ class KZ_Pipeline():
             self.metadata = pd.concat([self.metadata, this_metadata])
         
         self.metadata.to_csv(self.metadata_file, sep='\t', index=False)
+        
+        coverage_cmd = f"samtools depth {bam_file} | awk '{{sum+=$3}} END {{print sum/NR}}'"
+        coverage_result = subprocess.run(coverage_cmd, shell=True, capture_output=True, text=True)
+        average_coverage = coverage_result.stdout.strip()
+        
+        total_seqs_cmd = f"samtools stats {bam_file} | grep 'raw total sequences' | cut -f 3"
+        total_seqs_result = subprocess.run(total_seqs_cmd, shell=True, capture_output=True, text=True)
+        total_seqs = total_seqs_result.stdout.strip()
+        
+        reads_mapped_cmd = f"samtools stats {bam_file} | grep 'reads mapped' | cut -f 3"
+        reads_mapped_result = subprocess.run(reads_mapped_cmd, shell=True, capture_output=True, text=True)
+        reads_mapped = reads_mapped_result.stdout.strip()
+        
+        reads_unmapped_cmd = f"samtools stats {bam_file} | grep 'reads unmapped' | cut -f 3"
+        reads_unmapped_result = subprocess.run(reads_unmapped_cmd, shell=True, capture_output=True, text=True)
+        reads_unmapped = reads_unmapped_result.stdout.strip()
+        
+        quality_cmd = f"samtools stats {bam_file} | grep 'average quality' | cut -f 3"
+        quality_result = subprocess.run(quality_cmd, shell=True, capture_output=True, text=True)
+        quality = quality_result.stdout.strip()
 
+        snp_quality_cmd = f"bcftools query -f '%QUAL\\n' {vcf_file} | awk '{{sum+=$1; count++}} END {{print sum/count}}'"
+        snp_quality_result = subprocess.run(snp_quality_cmd, shell=True, capture_output=True, text=True)
+        average_snp_quality = snp_quality_result.stdout.strip()
+        
+        coverage_plot_cmd = f"samtools depth {bam_file}"
+        coverage_plot_result = subprocess.run(coverage_plot_cmd, shell=True, capture_output=True, text=True)
+        coverage_data = coverage_plot_result.stdout.strip().split('\n')
+        
+        return average_coverage, total_seqs, reads_mapped, reads_unmapped, quality, average_snp_quality, coverage_data
 
     ######################################################################################################################
     ## ---- CREATE OUR MSA FASTA
@@ -229,7 +258,8 @@ class KZ_Pipeline():
                   --alignment {alignment} \
                   --method iqtree \
                   --output {tree} \
-                  --nthreads {self.threads}"
+                  --nthreads {self.threads} \
+                  --tree-builder-args='-seed 123'"
                   )
         # Augur Refine
         os.system(f"augur refine \
