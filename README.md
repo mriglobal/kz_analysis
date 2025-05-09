@@ -17,15 +17,13 @@
 
 ##### Releases location on right side bar
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/releases.png" alt="Releases location on right side bar">
-</div>
+| <img src="img/releases.png" width="600"> |
+|:----------------------------------------:|
 
 ##### Location of kz.tar.gz in releases menu
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/releases_2.png" alt="Location of kz.tar.gz in releases menu">
-</div>
+| <img src="img/releases_2.png" width="600"> |
+|:------------------------------------------:|
 
 - Set up the environment when the kz.tar.gz is in the git repo
     - `bash install_environment.sh`
@@ -50,71 +48,60 @@ All data can be exported as a final step into a .zip archive
 ### Application Features
 #### Radio buttons on the side allow for navigation between the five pages
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/radio_buttons.png" alt="Radio buttons on the left side bar">
-</div>
+| <img src="img/radio_buttons.png" width="600"> |
+|:---------------------------------------------:|
 
 ### Generate fastQC report
 #### Fastq files can be uploaded on the Generate fastQC report tab to evaluate read qualities. Specify the directory to your data and the dropdown menu will allow you to select which one to generate a report for.
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/generate_fastq_report.png" alt="Generate fastQC_report input window">
-</div>
+| <img src="img/generate_fastq_report.png" width="600"> |
+|:-----------------------------------------------------:|
 
 #### Fastqc reports will pop up in a new browser tab, and provide sequence information
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/fastQC_output.png" alt="FastQC report example">
-</div>
+| <img src="img/fastQC_output.png" width="600"> |
+|:---------------------------------------------:|
 
 ### Upload Fastq
 #### Fastq files can be uploaded on the Upload Fastq to assemble and find consensus sequences with the reference ahead of nextstrain and embedding tasks. Upload your sequence and fill in the subsequent metadata fields
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/upload_fastq_input.png" alt="Upload Fastq input">
-</div>
+| <img src="img/upload_fastq_input.png" width="600"> |
+|:--------------------------------------------------:|
 
 #### Assembly stats as well as a plot of read coverage to the reference is output, and the data is uploaded for downstream analysis
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/upload_fastq_out.png" alt="Upload Fastq output">
-</div>
+| <img src="img/upload_fastq_out.png" width="600"> |
+|:------------------------------------------------:|
 
 ### Run Nextstrain
 #### To generate the nextstrain dashboard, select CCHF or TBEV to cycle between the two datasets. The default is to not include NCBI data. Note nextstrain requires at least three sequences to perform analysis
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/run_nextstrain_no_NCBI.png" alt="Run Nextstrain input screen">
-</div>
+| <img src="img/run_nextstrain_no_NCBI.png" width="600"> |
+|:------------------------------------------------------:|
 
 #### Add NCBI data to compare to the available complete genbank records
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/run_nextstrain_with_NCBI.png" alt="Run Nextstrain with NCBI data added">
-</div>
+| <img src="img/run_nextstrain_with_NCBI.png" width="600"> |
+|:--------------------------------------------------------:|
 
 #### Records can individually be selected or deselected for inclusion in the nextstrain dashboard using the checkbox in the Include column. Records can be deleted by checking the Delete column for records to be deleted, then clicking "Delete Selected Records"
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/delete_include_buttons.png" alt="Include and Delete columns">
-</div>
+| <img src="img/delete_include_buttons.png" width="600"> |
+|:------------------------------------------------------:|
 
 #### The dashboard will pop up in a new tab when the Submit button is clicked. Nextstrain supports many different colorings along metadata categories through the tools on the lefthand side.
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/nextstrain_dashboard.png" alt="Nextstrain dashboard example">
-</div>
+| <img src="img/nextstrain_dashboard.png" width="600"> |
+|:----------------------------------------------------:|
 
 ### Run Embedding
 #### Uploaded records can be visualized with their metadata labels on a sourmash embedding plot with the available NCBI genbank data on the Run Embedding page
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/run_embedding.png" alt="Run embedding page">
-</div>
+| <img src="img/run_embedding.png" width="600"> |
+|:--------------------------------------------:|
 
 ### Export Results
 #### Results can be exported as all CCHF, all TBEV, or selected records uploaded by the user. For the Export select sequences button, only records with the Include box check will be exported to the downloaded .zip archive
 
-<div style="border:1px solid #ccc; padding:10px; display:inline-block;">
-  <img src="img/export_screen.png" alt="Export page">
-</div>
+| <img src="img/export_screen.png" width="600"> |
+|:---------------------------------------------:|
