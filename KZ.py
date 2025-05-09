@@ -67,6 +67,7 @@ class KZ_Pipeline():
                 'isolation_source': [],
                 'host':             [],
                 'desc':             [],
+                'subtype':          []
             })
 
         self.ncbidata = pd.read_table(self.ncbidata_file)
@@ -177,7 +178,8 @@ class KZ_Pipeline():
                     'isolation_source':     [metadata_input['isolation_source']],
                     'host':                 [metadata_input['host']],
                     'desc':                 [seq.description.replace(seq.id,'').strip()],
-                    'seq':                  [seq.seq]
+                    'seq':                  [seq.seq],
+                    'subtype':              ['user added']
                 })
 
             # Add to metadata table
@@ -305,10 +307,10 @@ class KZ_Pipeline():
     def process_embedding(self,input_df, args):
 
         # Get labels for uploaded data
-        input_labels = input_df[['name','length','date','country','isolation_source','host','desc','type']]
+        input_labels = input_df[['name','length','date','country','isolation_source','host','desc','type','subtype']]
 
         # Get labels for genbank data
-        genbank_labels = self.ncbidata[['name','length','date','country','isolation_source','host','desc']]
+        genbank_labels = self.ncbidata[['name','length','date','country','isolation_source','host','desc','subtype']]
         genbank_labels['type'] = 'Genbank'
         labels = pd.concat([input_labels,genbank_labels])
 

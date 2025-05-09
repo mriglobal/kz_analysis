@@ -163,8 +163,8 @@ def run_nextstrain():
     if len(df) > 0:
         df['Include'] = True
         df['Delete'] = False  # Column to select records for deletion
-        edited_df = df[['Delete', 'Include', 'name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc']]
-        edited_df = st.data_editor(df, disabled=('name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc','seq'))
+        edited_df = df[['Delete', 'Include', 'name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc', 'subtype']]
+        edited_df = st.data_editor(df, disabled=('name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc','seq','subtype'))
 
         # Delete selected records
         if st.button("Delete Selected Records"):
@@ -187,7 +187,7 @@ def run_nextstrain():
                 st.write('Creating Augur Alignment...')
                 run.create_msa(new_df[['name', 'desc', 'seq']])
                 st.write('Building trees and node data...')
-                run.process_augur(new_df[['name', 'date', 'country', 'isolation_source', 'host']])
+                run.process_augur(new_df[['name', 'date', 'country', 'isolation_source', 'host', 'subtype']])
                 st.write('Passing data to nextstrain...')
                 run.view_nextstrain()
             else:
@@ -211,7 +211,7 @@ def run_embedding():
     # Get our dataframe but it in an editable table
     edited_df = run.metadata
     edited_df['Include'] = True
-    edited_df = st.data_editor(edited_df, disabled=('name','date','length','country','isolation_source','host','desc','seq'))
+    edited_df = st.data_editor(edited_df, disabled=('name','date','length','country','isolation_source','host','desc','seq','subtype'))
 
     # Selector controls for graph
     col1, col2 = st.columns(2)
@@ -221,7 +221,8 @@ def run_embedding():
                 'type',
                 'country',
                 'host',
-                'length'
+                'length',
+                'subtype'
             ])
 
     # Submit Changes. Build new DF and Run Embedding
@@ -256,12 +257,13 @@ def run_embedding():
             'Date': labels['date'],
             'Country': labels['country'],
             'Host': labels['host'],
+            'Subtype': labels['subtype']
             })
         chart = alt.Chart(plot_df).mark_circle().encode(
             x="x",
             y="y",
             color="label",
-            tooltip=['Name','Description','Length','Date','Country','Host']
+            tooltip=['Name','Description','Length','Date','Country','Host','Subtype']
         ).properties(
             width=800,
             height=600
@@ -314,9 +316,9 @@ def run_export():
     
     # Concatenate the DataFrames
     df = pd.concat([df1,df2]).reset_index(drop=True)
-    edited_df = df[['name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc', 'seq', 'Include']]
+    edited_df = df[['name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc', 'seq', 'subtype']]
     edited_df['Include']=False
-    edited_df = st.data_editor(edited_df, disabled=('name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc','seq'))
+    edited_df = st.data_editor(edited_df, disabled=('name', 'date', 'length', 'country', 'isolation_source', 'host', 'desc','seq', 'subtype'))
     
     if st.button("Export select sequences"):
         selected_df = edited_df[edited_df['Include']]

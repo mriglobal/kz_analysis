@@ -24,6 +24,11 @@
        "key": "country",
        "title": "Country",
        "type": "categorical"
+     },
+     {
+       "key": "subtype",
+       "title": "Subtype",
+       "type": "categorical"
      }
     ],
     "geo_resolutions": [
