@@ -15,12 +15,12 @@
 - Download the associated kz_tar.gz_v1.0.0 by clicking on 'releases' and then on the kz.tar.gz to start the Download
     - move the downloaded tar file to the cloned repo location
 
-##### Releases location on right side bar
+#### Releases location on right side bar
 
 | <img src="img/releases.png" width="600"> |
 |:----------------------------------------:|
 
-##### Location of kz.tar.gz in releases menu
+#### Location of kz.tar.gz in releases menu
 
 | <img src="img/releases_2.png" width="600"> |
 |:------------------------------------------:|
@@ -46,62 +46,62 @@ All data can be exported as a final step into a .zip archive
 
 
 ### Application Features
-#### Radio buttons on the side allow for navigation between the five pages
+##### Radio buttons on the side allow for navigation between the five pages
 
 | <img src="img/radio_buttons.png" width="600"> |
 |:---------------------------------------------:|
 
 ### Generate fastQC report
-#### Fastq files can be uploaded on the Generate fastQC report tab to evaluate read qualities. Specify the directory to your data and the dropdown menu will allow you to select which one to generate a report for.
+##### Fastq files can be uploaded on the Generate fastQC report tab to evaluate read qualities. Specify the directory to your data and the dropdown menu will allow you to select which one to generate a report for.
 
 | <img src="img/generate_fastq_report.png" width="600"> |
 |:-----------------------------------------------------:|
 
-#### Fastqc reports will pop up in a new browser tab, and provide sequence information
+##### Fastqc reports will pop up in a new browser tab, and provide sequence information
 
 | <img src="img/fastQC_output.png" width="600"> |
 |:---------------------------------------------:|
 
 ### Upload Fastq
-#### Fastq files can be uploaded on the Upload Fastq to assemble and find consensus sequences with the reference ahead of nextstrain and embedding tasks. Upload your sequence and fill in the subsequent metadata fields
+##### Fastq files can be uploaded on the Upload Fastq to assemble and find consensus sequences with the reference ahead of nextstrain and embedding tasks. Upload your sequence and fill in the subsequent metadata fields
 
 | <img src="img/upload_fastq_input.png" width="600"> |
 |:--------------------------------------------------:|
 
-#### Assembly stats as well as a plot of read coverage to the reference is output, and the data is uploaded for downstream analysis
+##### Assembly stats as well as a plot of read coverage to the reference is output, and the data is uploaded for downstream analysis
 
 | <img src="img/upload_fastq_out.png" width="600"> |
 |:------------------------------------------------:|
 
 ### Run Nextstrain
-#### To generate the nextstrain dashboard, select CCHF or TBEV to cycle between the two datasets. The default is to not include NCBI data. Note nextstrain requires at least three sequences to perform analysis
+##### To generate the nextstrain dashboard, select CCHF or TBEV to cycle between the two datasets. The default is to not include NCBI data. Note nextstrain requires at least three sequences to perform analysis
 
 | <img src="img/run_nextstrain_no_NCBI.png" width="600"> |
 |:------------------------------------------------------:|
 
-#### Add NCBI data to compare to the available complete genbank records
+##### Add NCBI data to compare to the available complete genbank records
 
 | <img src="img/run_nextstrain_with_NCBI.png" width="600"> |
 |:--------------------------------------------------------:|
 
-#### Records can individually be selected or deselected for inclusion in the nextstrain dashboard using the checkbox in the Include column. Records can be deleted by checking the Delete column for records to be deleted, then clicking "Delete Selected Records"
+##### Records can individually be selected or deselected for inclusion in the nextstrain dashboard using the checkbox in the Include column. Records can be deleted by checking the Delete column for records to be deleted, then clicking "Delete Selected Records"
 
 | <img src="img/delete_include_buttons.png" width="600"> |
 |:------------------------------------------------------:|
 
-#### The dashboard will pop up in a new tab when the Submit button is clicked. Nextstrain supports many different colorings along metadata categories through the tools on the lefthand side.
+##### The dashboard will pop up in a new tab when the Submit button is clicked. Nextstrain supports many different colorings along metadata categories through the tools on the lefthand side.
 
 | <img src="img/nextstrain_dashboard.png" width="600"> |
 |:----------------------------------------------------:|
 
 ### Run Embedding
-#### Uploaded records can be visualized with their metadata labels on a sourmash embedding plot with the available NCBI genbank data on the Run Embedding page
+##### Uploaded records can be visualized with their metadata labels on a sourmash embedding plot with the available NCBI genbank data on the Run Embedding page
 
 | <img src="img/run_embedding.png" width="600"> |
 |:--------------------------------------------:|
 
 ### Export Results
-#### Results can be exported as all CCHF, all TBEV, or selected records uploaded by the user. For the Export select sequences button, only records with the Include box check will be exported to the downloaded .zip archive
+##### Results can be exported as all CCHF, all TBEV, or selected records uploaded by the user. For the Export select sequences button, only records with the Include box check will be exported to the downloaded .zip archive
 
 | <img src="img/export_screen.png" width="600"> |
 |:---------------------------------------------:|
