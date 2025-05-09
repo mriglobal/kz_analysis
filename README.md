@@ -12,44 +12,17 @@
 - Git clone this repo
     - `cd` to where you want this folder
     - `git clone git@pandora.mriglobal.org:cprice/kz_augur.git`
-- Set up your environment
-    - `cd kz_augur`
-    - `conda env create -f KZ_augur.yml`
-    - `conda activate KZ_augur`
-    - `pip install streamlit`
+- Download the associated kz_tar.gz_v1.0.0 by clicking on 'releases' and then on the kz.tar.gz to start the Download
+    - move the downloaded tar file to the cloned repo location
+![Releases location on right side bar](img/releases.png)
+![Location of kz.tar.gz in releases menu](img/releases_2.png)
+- Set up the environment when the kz.tar.gz is in the git repo
+    - `bash install_environment.sh`
+    - `source source kz_env/bin/activate`
+- Launch the app
+    - `bash start_steamlit.sh`
+    - if it doesn't automatically pop up in web browser, navigate to http://localhost:8501 to use the app
 
-#### How to run
-- In a terminal, move to the kz_augur folder
-- Type in `streamlit run app.py`
-- A browser will pop up with your streamlit app
-- Add at least 3 fastq files to one of the two references (TBEV or CCHF)
-- Click on "Nextstrain"
-- Select either TBEV or CCHF from the dropdown
-- Uncheck any strains you do not want in your nextflow analysis, if any
-- Click Submit
-- Nextstrain will open in a new window. The first run will take a few minutes as it builds the docker container. Just reload the page once it's done.
-
-#### Alternative Conda Creation
-The conda environment has been difficult to reconstruct. Following these directions after setting up Docker has been successful:
-- conda create -c conda-forge --name kz nodejs=16
-- conda activate kz
-- conda install -c conda-forge -c bioconda augur
-- curl -fsSL --proto '=https' https://nextstrain.org/cli/installer/linux | bash
-- conda config --add channels bioconda
-- conda config --add channels conda-forge
-- conda install -c bioconda samtools
-- conda install bcftools
-- conda install minimap2
-- conda install samtools
-- conda install scikit-learn
-- conda install sourmash
-- conda install umap-learn
-- conda install seaborn
-- conda install bokeh
-- conda install holoviews
-- conda install scikit-image
-- conda install matplotlib
-- pip install streamlit
 
 #### Process Description
 The pipeline begins with the mapping of the fastq sequences to the selected reference, either Crimean Congo Hemorrhagic Fever (CCHF) or Tick Borne Encephalitis Virus (TBEV) using Minimap2. The output is a .SAM file, which is then converted and sorted into a .BAM file using Samtools. Then, Bcftools performs variant calling on the sorted .BAM file to create a compressed vcf.gz file. Tabix is then used to create an index file for the vcf file. The final component of this initial step is a consensus sequence generation from the VCF file using Bcftools, aligning the variants back to the reference genome to create the consensus .FASTA file.
@@ -61,3 +34,43 @@ After uploading the files for analysis, the next step is to run nexstrain. Befor
 Another method of viewing the uploaded sequence data is through running a sourmash embedding. The function starts by aggregating any input labels with the genbank labeled data for the given CCHF or TBEV input. Each sequence has a MinHash sketch created, and the MinHashes are aggregated. A similarity matrix is created using sourmash compare_all_pairs, which performs a pairwise comparison between all the aggregated sketches. The output is then visualized as an altair dynamic plot, which can be used to explore similarity between the data.
 
 All data can be exported as a final step into a .zip archive
+
+
+### Application Features
+Radio buttons on the side allow for navigation between the five pages
+![Radio buttons on the left side bar](img/radio_buttons.png)
+
+#### Generate fastQC report
+Fastq files can be uploaded on the Generate fastQC report tab to evaluate read qualities. Specify the directory to your data and the dropdown menu will allow you to select which one to generate a report for.
+![Generate fastQC_report input window](img/generate_fastqc_report.png)
+
+Fastqc reports will pop up in a new browser tab, and provide sequence information
+![FastQC report example](img/fastQC_output.png)
+
+#### Upload Fastq
+Fastq files can be uploaded on the Upload Fastq to assemble and find consensus sequences with the reference ahead of nextstrain and embedding tasks. Upload your sequence and fill in the subsequent metadata fields
+![Upload Fastq input](img/upload_fastq_input.png)
+
+Assembly stats as well as a plot of read coverage to the reference is output, and the data is uploaded for downstream analysis
+![Upload Fastq output](img/upload_fastq_out.png)
+
+#### Run Nextstrain
+To generate the nextstrain dashboard, select CCHF or TBEV to cycle between the two datasets. The default is to not include NCBI data. Note nextstrain requires at least three sequences to perform analysis
+![Run Nextstrain input screen](img/run_nextstrain_no_NCBI.png)
+
+Add NCBI data to compare to the available complete genbank records
+![Run Nextstrain with NCBI data added](img/run_nextstrain_with_NCBI.png)
+
+Records can individually be selected or deselected for inclusion in the nextstrain dashboard using the checkbox in the Include column. Records can be deleted by checking the Delete column for records to be deleted, then clicking "Delete Selected Records"
+![Include and Delete columns](img/delete_include_buttons.png)
+
+The dashboard will pop up in a new tab when the Submit button is clicked. Nextstrain supports many different colorings along metadata categories through the tools on the lefthand side.
+![Nextstrain dashboard example](img/nextstrain_dashboard.png)
+
+#### Run Embedding
+Uploaded records can be visualized with their metadata labels on a sourmash embedding plot with the available NCBI genbank data on the Run Embedding page
+![Run embedding page](img/run_embedding.png)
+
+#### Export Results
+Results can be exported as all CCHF, all TBEV, or selected records uploaded by the user. For the Export select sequences button, only records with the Include box check will be exported to the downloaded .zip archive
+![Export page](img/export_screen.png)
